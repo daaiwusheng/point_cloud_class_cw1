@@ -4,7 +4,7 @@ import open3d as o3d
 import os
 import numpy as np
 from pyntcloud import PyntCloud
-
+import pandas as pd
 
 # 功能：计算PCA的函数
 # 输入：
@@ -15,37 +15,45 @@ from pyntcloud import PyntCloud
 #     eigenvalues：特征值
 #     eigenvectors：特征向量
 def PCA(data, correlation=False, sort=True):
+    pass
     # 作业1
     # 屏蔽开始
 
     # 屏蔽结束
 
-    if sort:
-        sort = eigenvalues.argsort()[::-1]
-        eigenvalues = eigenvalues[sort]
-        eigenvectors = eigenvectors[:, sort]
+    # if sort:
+    #     sort = eigenvalues.argsort()[::-1]
+    #     eigenvalues = eigenvalues[sort]
+    #     eigenvectors = eigenvectors[:, sort]
 
-    return eigenvalues, eigenvectors
+    # return eigenvalues, eigenvectors
 
 
 def main():
     # 指定点云路径
-    cat_index = 10  # 物体编号，范围是0-39，即对应数据集中40个物体
-    root_dir = '/Users/wangyu/Desktop/点云算法/第一张/modelnet40_normal_resampled'  # 数据集路径
+    cat_index = 0  # 物体编号，范围是0-39，即对应数据集中40个物体
+    root_dir = '/Users/wangyu/Desktop/点云算法/第一张/modelnet40_normal_resampled/'  # 数据集路径
     cat = os.listdir(root_dir)
-    filename = os.path.join(root_dir, cat[cat_index], 'train', cat[cat_index] + '_0001.ply')  # 默认使用第一个点云
+    filename = os.path.join(root_dir, cat[cat_index], cat[cat_index] + '_0001.txt')  # 默认使用第一个点云
+
+    # 加载自己的点云文件
+    # 读取点云txt文件
+    cloud_points = np.genfromtxt(filename, delimiter=",")
+    cloud_points = pd.DataFrame(cloud_points[:, 0:3])
+    cloud_points.columns = ['x', 'y', 'z']
+    point_cloud_pynt = PyntCloud(cloud_points)
 
     # 加载原始点云
-    point_cloud_pynt = PyntCloud.from_file("/Users/renqian/Downloads/program/cloud_data/11.ply")
+    # point_cloud_pynt = PyntCloud.from_file(filename)
     point_cloud_o3d = point_cloud_pynt.to_instance("open3d", mesh=False)
-    # o3d.visualization.draw_geometries([point_cloud_o3d]) # 显示原始点云
+    o3d.visualization.draw_geometries([point_cloud_o3d])  # 显示原始点云
 
     # 从点云中获取点，只对点进行处理
-    points = point_cloud_pynt.points
-    print('total points number is:', points.shape[0])
+    cloud_points = point_cloud_pynt.points
+    print('total cloud_points number is:', cloud_points.shape[0])
 
     # 用PCA分析点云主方向
-    w, v = PCA(points)
+    w, v = PCA(cloud_points)
     point_cloud_vector = v[:, 2]  # 点云主方向对应的向量
     print('the main orientation of this pointcloud is: ', point_cloud_vector)
     # TODO: 此处只显示了点云，还没有显示PCA
