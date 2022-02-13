@@ -83,15 +83,18 @@ def main():
     normals = []
     # 作业2
     # 屏蔽开始
-
-
+    for i in range(cloud_points_array.shape[0]):
+        [k, idx, _] = pcd_tree.search_knn_vector_3d(point_cloud_o3d.points[i], 40)
+        k_nearest_point = np.asarray(point_cloud_o3d.points)[idx, :]  # 这里应该包括当前的点的索引
+        w1, v1 = PCA(k_nearest_point)  # PCA 后获取三个特征向量
+        normals.append(v1[:, 2])  # 去最后一个特征向量就是法向量
     # 由于最近邻搜索是第二章的内容，所以此处允许直接调用open3d中的函数
 
     # 屏蔽结束
     normals = np.array(normals, dtype=np.float64)
     # TODO: 此处把法向量存放在了normals中
     point_cloud_o3d.normals = o3d.utility.Vector3dVector(normals)
-    o3d.visualization.draw_geometries([point_cloud_o3d])
+    o3d.visualization.draw_geometries([point_cloud_o3d], point_show_normal=True)
 
 
 if __name__ == '__main__':
